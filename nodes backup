@@ -1,0 +1,40 @@
+
+
+	links = route["Links"].split(",")
+	allLinks.append(links)
+
+
+
+#create nodes for all surbubs and store them in list
+
+allNodes=[]
+
+for surbub in surbubsCodes:
+	myNeighbors =[]
+	for pair in allLinks:
+		code = str(surbub["Code"])
+		if(pair[0] == code):
+			myNeighbors.append(pair[1])
+	node = Node(surbub["Code"],surbub["Name"],myNeighbors)
+	allNodes.append(node)
+
+	
+#rint(surbubsCodes)
+
+for node in allNodes:
+	joined = node.neighbors
+	#msp neigbor code to node objects
+	neighborsObjects = []
+	for joiny in joined:
+		obj = allNodes[int(joiny)-1]
+		#obj["weight"]
+		neighborsObjects.append(obj)
+		#print(neighborsObjects)
+	node.neighbors=neighborsObjects
+		
+		
+			
+
+	
+	print(node.name,node.code,node.neighbors)
+

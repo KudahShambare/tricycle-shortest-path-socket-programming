@@ -5,7 +5,7 @@ import json
 
 clientSocket = socket.socket()
 
-clientSocket.connect(("localhost",2030))
+clientSocket.connect(("localhost",2085))
 
 # import data from excel files
 surbubsCodes = pandas.read_excel("Surbubs.xlsx").to_json(orient='records')
@@ -15,9 +15,11 @@ routes =  pandas.read_excel("Routes.xlsx").to_json(orient='records')
 surbubsCodes =json.loads(surbubsCodes)
 routes =json.loads(routes)
 
+#create a file to store routes
+routesFile = open("routes.txt","w")
 
 #create graph vertices 
-allLinks = []
+toSendToServer = ""
 for route in routes:
 
 	#add weight to the routes
@@ -29,50 +31,34 @@ for route in routes:
 		route["Weight"] = abs(route["Distance"]/route["Time (Minutes)"])
 
 
+	#convert every route object into a string and add it to a txt file
+	#   $$$   is the delimiter used to split lines in the txt file
 
-	links = route["Links"].split(",")
-	allLinks.append(links)
+	routeString = route["Links"]+"#"+str(route["Distance"])+"#"+str(route["Route Reports"])+"#"+str(route["Time (Minutes)"])+"#"+str(route["Weight"] )+"   $$$$   "
+	routesFile.write(routeString)
+	toSendToServer+=routeString
+
+#clse file after writing has been completed
+routesFile.close()	
 
 
-class Node:
 
-	def __init__ (self,code,name,neighbors):
-		self.code = code
-		self.name = name
-		self.neighbors = neighbors
+#send allLinks to the server
 
-#create nodes for all surbubs and store them in list
+clientSocket.send(bytes(toSendToServer,"utf-8"))
 
-allNodes=[]
 
-for surbub in surbubsCodes:
-	myNeighbors =[]
-	for pair in allLinks:
-		code = str(surbub["Code"])
-		if(pair[0] == code):
-			myNeighbors.append(pair[1])
-	node = Node(surbub["Code"],surbub["Name"],myNeighbors)
-	allNodes.append(node)
 
-	
-#rint(surbubsCodes)
 
-for node in allNodes:
-	joined = node.neighbors
-	#msp neigbor code to node objects
-	neighborsObjects = []
-	for joiny in joined:
-		obj = allNodes[int(joiny)-1]
-		#obj["weight"]
-		neighborsObjects.append(obj)
-		#print(neighborsObjects)
-	node.neighbors=neighborsObjects
-		
-		
-			
 
-	
-	#print(node.name,node.code,node.neighbors)
+
+
+
+
+
+
+
+
 
 
 
